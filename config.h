@@ -35,6 +35,7 @@ static const Rule rules[] = {
 	 *	WM_NAME(STRING) = title
 	 */
 	/* class              instance    title       tags mask     isfloating   monitor */
+	{ "file_chooser",     NULL,       NULL,       0,            1,           -1 },
 	{ "tmux",             NULL,       NULL,       TAG_TMUX,     0,           -1 },
 	{ "aerc",             NULL,       NULL,       TAG_AERC,     0,           -1 },
 	{ "spotatui",         NULL,       NULL,       TAG_SPOTATUI, 0,           -1 },
@@ -58,8 +59,8 @@ static const int refreshrate = 120;  /* refresh rate (per second) for client mov
 
 static const Layout layouts[] = {
 	/* symbol     arrange function */
-    { "[]=",      tile },/* first entry is default: fullscreen monocle */
-	{ "[M]",      monocle }, 
+	{ "[M]",      monocle }, /* first entry is default: fullscreen monocle */
+	{ "[]=",      tile },
 	{ "><>",      NULL },    /* no layout function means floating behavior */
 };
 
@@ -77,6 +78,7 @@ static const Layout layouts[] = {
 /* commands */
 static const char *termcmd[] = { "kitty", "--single-instance", NULL };
 static const char *roficmd[] = { "rofi", "-show", "drun", NULL };
+static const char *yazicmd[] = { "kitty", "--single-instance", "yazi", NULL };
 
 static const Key keys[] = {
 	/* modifier                     key        function        argument */
@@ -99,6 +101,7 @@ static const Key keys[] = {
 	/* Launchers */
 	{ MODKEY,                       XK_space,  spawn,          {.v = roficmd } },
 	{ MODKEY,                       XK_Return, spawn,          {.v = termcmd } },
+	{ MODKEY,                       XK_e,      spawn,          {.v = yazicmd } },
 
 	/* Window & Tag Control */
 	{ MODKEY|ShiftMask,             XK_c,      killclient,     {0} },
