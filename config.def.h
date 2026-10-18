@@ -1,17 +1,17 @@
 /* See LICENSE file for copyright and license details. */
 
 /* appearance */
-static const unsigned int borderpx  = 1;        /* border pixel of windows */
+static const unsigned int borderpx  = 0;        /* border pixel of windows (0 = borderless to maximize screen) */
 static const unsigned int snap      = 32;       /* snap pixel */
-static const int showbar            = 1;        /* 0 means no bar */
+static const int showbar            = 0;        /* 0 means no bar */
 static const int topbar             = 1;        /* 0 means bottom bar */
-static const char *fonts[]          = { "monospace:size=10" };
-static const char dmenufont[]       = "monospace:size=10";
-static const char col_gray1[]       = "#222222";
-static const char col_gray2[]       = "#444444";
-static const char col_gray3[]       = "#bbbbbb";
-static const char col_gray4[]       = "#eeeeee";
-static const char col_cyan[]        = "#005577";
+static const char *fonts[]          = { "JetBrainsMono Nerd Font:size=11", "monospace:size=10" };
+static const char dmenufont[]       = "JetBrainsMono Nerd Font:size=11";
+static const char col_gray1[]       = "#1a1b26";
+static const char col_gray2[]       = "#24283b";
+static const char col_gray3[]       = "#a9b1d6";
+static const char col_gray4[]       = "#c0caf5";
+static const char col_cyan[]        = "#7aa2f7";
 static const char *colors[][3]      = {
 	/*               fg         bg         border   */
 	[SchemeNorm] = { col_gray3, col_gray1, col_gray2 },
@@ -21,32 +21,50 @@ static const char *colors[][3]      = {
 /* tagging */
 static const char *tags[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
 
+/* Tag bitmask definitions for dedicated apps */
+#define TAG_TMUX     (1 << 0)  /* Tag 1: Terminal / tmux   (Super+d) */
+#define TAG_AERC     (1 << 1)  /* Tag 2: aerc email        (Super+a) */
+#define TAG_SPOTATUI (1 << 2)  /* Tag 3: spotatui music    (Super+s) */
+#define TAG_IAMB     (1 << 3)  /* Tag 4: iamb chat         (Super+z) */
+#define TAG_HELIUM   (1 << 4)  /* Tag 5: Helium browser    (Super+x) */
+#define TAG_KICAD    (1 << 5)  /* Tag 6: KiCad EDA         (Super+q) */
+
 static const Rule rules[] = {
 	/* xprop(1):
 	 *	WM_CLASS(STRING) = instance, class
 	 *	WM_NAME(STRING) = title
 	 */
-	/* class      instance    title       tags mask     isfloating   monitor */
-	{ "Gimp",     NULL,       NULL,       0,            1,           -1 },
-	{ "Firefox",  NULL,       NULL,       1 << 8,       0,           -1 },
+	/* class              instance    title       tags mask     isfloating   monitor */
+	{ "tmux",             NULL,       NULL,       TAG_TMUX,     0,           -1 },
+	{ "aerc",             NULL,       NULL,       TAG_AERC,     0,           -1 },
+	{ "spotatui",         NULL,       NULL,       TAG_SPOTATUI, 0,           -1 },
+	{ "iamb",             NULL,       NULL,       TAG_IAMB,     0,           -1 },
+	{ "helium",           NULL,       NULL,       TAG_HELIUM,   0,           -1 },
+	{ "Helium",           NULL,       NULL,       TAG_HELIUM,   0,           -1 },
+	{ "helium-browser",   NULL,       NULL,       TAG_HELIUM,   0,           -1 },
+	{ "Helium-browser",   NULL,       NULL,       TAG_HELIUM,   0,           -1 },
+	{ "kicad",            NULL,       NULL,       TAG_KICAD,    0,           -1 },
+	{ "KiCad",            NULL,       NULL,       TAG_KICAD,    0,           -1 },
+	{ "pcbnew",           NULL,       NULL,       TAG_KICAD,    0,           -1 },
+	{ "eeschema",         NULL,       NULL,       TAG_KICAD,    0,           -1 },
 };
 
 /* layout(s) */
 static const float mfact     = 0.55; /* factor of master area size [0.05..0.95] */
 static const int nmaster     = 1;    /* number of clients in master area */
-static const int resizehints = 1;    /* 1 means respect size hints in tiled resizals */
+static const int resizehints = 0;    /* 0 avoids gaps around terminal character grids to truly maximize screen */
 static const int lockfullscreen = 1; /* 1 will force focus on the fullscreen window */
 static const int refreshrate = 120;  /* refresh rate (per second) for client move/resize */
 
 static const Layout layouts[] = {
 	/* symbol     arrange function */
-	{ "[]=",      tile },    /* first entry is default */
+	{ "[M]",      monocle }, /* first entry is default: fullscreen monocle */
+	{ "[]=",      tile },
 	{ "><>",      NULL },    /* no layout function means floating behavior */
-	{ "[M]",      monocle },
 };
 
 /* key definitions */
-#define MODKEY Mod1Mask
+#define MODKEY Mod4Mask
 #define TAGKEYS(KEY,TAG) \
 	{ MODKEY,                       KEY,      view,           {.ui = 1 << TAG} }, \
 	{ MODKEY|ControlMask,           KEY,      toggleview,     {.ui = 1 << TAG} }, \
@@ -57,28 +75,44 @@ static const Layout layouts[] = {
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
 
 /* commands */
-static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
-static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_cyan, "-sf", col_gray4, NULL };
-static const char *termcmd[]  = { "st", NULL };
+static const char *termcmd[] = { "kitty", "--single-instance", NULL };
+static const char *roficmd[] = { "rofi", "-show", "drun", NULL };
 
 static const Key keys[] = {
 	/* modifier                     key        function        argument */
-	{ MODKEY,                       XK_p,      spawn,          {.v = dmenucmd } },
-	{ MODKEY|ShiftMask,             XK_Return, spawn,          {.v = termcmd } },
+	/* Direct App / Tag Navigation */
+	{ MODKEY,                       XK_d,      view,           {.ui = TAG_TMUX} },
+	{ MODKEY,                       XK_a,      view,           {.ui = TAG_AERC} },
+	{ MODKEY,                       XK_s,      view,           {.ui = TAG_SPOTATUI} },
+	{ MODKEY,                       XK_z,      view,           {.ui = TAG_IAMB} },
+	{ MODKEY,                       XK_x,      view,           {.ui = TAG_HELIUM} },
+	{ MODKEY,                       XK_q,      view,           {.ui = TAG_KICAD} },
+
+	/* Send focused window to App Tags */
+	{ MODKEY|ShiftMask,             XK_d,      tag,            {.ui = TAG_TMUX} },
+	{ MODKEY|ShiftMask,             XK_a,      tag,            {.ui = TAG_AERC} },
+	{ MODKEY|ShiftMask,             XK_s,      tag,            {.ui = TAG_SPOTATUI} },
+	{ MODKEY|ShiftMask,             XK_z,      tag,            {.ui = TAG_IAMB} },
+	{ MODKEY|ShiftMask,             XK_x,      tag,            {.ui = TAG_HELIUM} },
+	{ MODKEY|ShiftMask,             XK_q,      tag,            {.ui = TAG_KICAD} },
+
+	/* Launchers */
+	{ MODKEY,                       XK_space,  spawn,          {.v = roficmd } },
+	{ MODKEY,                       XK_Return, spawn,          {.v = termcmd } },
+
+	/* Window & Tag Control */
+	{ MODKEY|ShiftMask,             XK_c,      killclient,     {0} },
 	{ MODKEY,                       XK_b,      togglebar,      {0} },
 	{ MODKEY,                       XK_j,      focusstack,     {.i = +1 } },
 	{ MODKEY,                       XK_k,      focusstack,     {.i = -1 } },
 	{ MODKEY,                       XK_i,      incnmaster,     {.i = +1 } },
-	{ MODKEY,                       XK_d,      incnmaster,     {.i = -1 } },
 	{ MODKEY,                       XK_h,      setmfact,       {.f = -0.05} },
 	{ MODKEY,                       XK_l,      setmfact,       {.f = +0.05} },
-	{ MODKEY,                       XK_Return, zoom,           {0} },
+	{ MODKEY|ShiftMask,             XK_Return, zoom,           {0} },
 	{ MODKEY,                       XK_Tab,    view,           {0} },
-	{ MODKEY|ShiftMask,             XK_c,      killclient,     {0} },
-	{ MODKEY,                       XK_t,      setlayout,      {.v = &layouts[0]} },
-	{ MODKEY,                       XK_f,      setlayout,      {.v = &layouts[1]} },
-	{ MODKEY,                       XK_m,      setlayout,      {.v = &layouts[2]} },
-	{ MODKEY,                       XK_space,  setlayout,      {0} },
+	{ MODKEY,                       XK_m,      setlayout,      {.v = &layouts[0]} },
+	{ MODKEY,                       XK_t,      setlayout,      {.v = &layouts[1]} },
+	{ MODKEY,                       XK_f,      setlayout,      {.v = &layouts[2]} },
 	{ MODKEY|ShiftMask,             XK_space,  togglefloating, {0} },
 	{ MODKEY,                       XK_0,      view,           {.ui = ~0 } },
 	{ MODKEY|ShiftMask,             XK_0,      tag,            {.ui = ~0 } },
@@ -86,6 +120,8 @@ static const Key keys[] = {
 	{ MODKEY,                       XK_period, focusmon,       {.i = +1 } },
 	{ MODKEY|ShiftMask,             XK_comma,  tagmon,         {.i = -1 } },
 	{ MODKEY|ShiftMask,             XK_period, tagmon,         {.i = +1 } },
+
+	/* Numbered Tags (1-9) */
 	TAGKEYS(                        XK_1,                      0)
 	TAGKEYS(                        XK_2,                      1)
 	TAGKEYS(                        XK_3,                      2)
@@ -95,7 +131,10 @@ static const Key keys[] = {
 	TAGKEYS(                        XK_7,                      6)
 	TAGKEYS(                        XK_8,                      7)
 	TAGKEYS(                        XK_9,                      8)
-	{ MODKEY|ShiftMask,             XK_q,      quit,           {0} },
+
+	/* Quit dwm */
+	{ MODKEY|ShiftMask,             XK_e,      quit,           {0} },
+	{ MODKEY|ControlMask|ShiftMask, XK_q,      quit,           {0} },
 };
 
 /* button definitions */
@@ -114,4 +153,3 @@ static const Button buttons[] = {
 	{ ClkTagBar,            MODKEY,         Button1,        tag,            {0} },
 	{ ClkTagBar,            MODKEY,         Button3,        toggletag,      {0} },
 };
-
