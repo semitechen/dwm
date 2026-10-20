@@ -88,6 +88,9 @@ static const char *downvol[]    = { "wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@
 static const char *mutevol[]    = { "wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@", "toggle", NULL };
 static const char *brightup[]   = { "brightnessctl", "set", "+5%", NULL };
 static const char *brightdown[] = { "brightnessctl", "set", "5%-", NULL };
+static const char *playpause[]  = { "playerctl", "play-pause", NULL };
+static const char *nexttrack[]  = { "playerctl", "next", NULL };
+static const char *prevtrack[]  = { "playerctl", "previous", NULL };
 
 static const Key keys[] = {
 	/* modifier                     key        function        argument */
@@ -116,12 +119,15 @@ static const Key keys[] = {
 	{ MODKEY|ShiftMask,             XK_c,      killclient,     {0} },
 	{ MODKEY,                       XK_b,      togglebar,      {0} },
 
-	/* Hardware Keys (Volume & Brightness for Framework 13) */
+	/* Hardware Keys (Volume, Brightness & Media for Framework 13) */
 	{ 0,                            XF86XK_AudioRaiseVolume,   spawn,          {.v = upvol } },
 	{ 0,                            XF86XK_AudioLowerVolume,   spawn,          {.v = downvol } },
 	{ 0,                            XF86XK_AudioMute,          spawn,          {.v = mutevol } },
 	{ 0,                            XF86XK_MonBrightnessUp,    spawn,          {.v = brightup } },
 	{ 0,                            XF86XK_MonBrightnessDown,  spawn,          {.v = brightdown } },
+	{ 0,                            XF86XK_AudioPlay,          spawn,          {.v = playpause } },
+	{ 0,                            XF86XK_AudioNext,          spawn,          {.v = nexttrack } },
+	{ 0,                            XF86XK_AudioPrev,          spawn,          {.v = prevtrack } },
 	{ MODKEY,                       XK_j,      focusstack,     {.i = +1 } },
 	{ MODKEY,                       XK_k,      focusstack,     {.i = -1 } },
 	{ MODKEY,                       XK_i,      incnmaster,     {.i = +1 } },
