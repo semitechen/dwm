@@ -75,10 +75,19 @@ static const Layout layouts[] = {
 /* helper for spawning shell commands in the pre dwm-5.0 fashion */
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
 
+#include <X11/XF86keysym.h>
+
 /* commands */
 static const char *termcmd[] = { "kitty", "--single-instance", NULL };
 static const char *roficmd[] = { "rofi", "-show", "drun", NULL };
 static const char *yazicmd[] = { "kitty", "--single-instance", "yazi", NULL };
+
+/* Hardware controls (PipeWire volume & brightness for Framework 13) */
+static const char *upvol[]      = { "wpctl", "set-volume", "-l", "1.5", "@DEFAULT_AUDIO_SINK@", "5%+", NULL };
+static const char *downvol[]    = { "wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", "5%-", NULL };
+static const char *mutevol[]    = { "wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@", "toggle", NULL };
+static const char *brightup[]   = { "brightnessctl", "set", "+5%", NULL };
+static const char *brightdown[] = { "brightnessctl", "set", "5%-", NULL };
 
 static const Key keys[] = {
 	/* modifier                     key        function        argument */
@@ -106,6 +115,13 @@ static const Key keys[] = {
 	/* Window & Tag Control */
 	{ MODKEY|ShiftMask,             XK_c,      killclient,     {0} },
 	{ MODKEY,                       XK_b,      togglebar,      {0} },
+
+	/* Hardware Keys (Volume & Brightness for Framework 13) */
+	{ 0,                            XF86XK_AudioRaiseVolume,   spawn,          {.v = upvol } },
+	{ 0,                            XF86XK_AudioLowerVolume,   spawn,          {.v = downvol } },
+	{ 0,                            XF86XK_AudioMute,          spawn,          {.v = mutevol } },
+	{ 0,                            XF86XK_MonBrightnessUp,    spawn,          {.v = brightup } },
+	{ 0,                            XF86XK_MonBrightnessDown,  spawn,          {.v = brightdown } },
 	{ MODKEY,                       XK_j,      focusstack,     {.i = +1 } },
 	{ MODKEY,                       XK_k,      focusstack,     {.i = -1 } },
 	{ MODKEY,                       XK_i,      incnmaster,     {.i = +1 } },
