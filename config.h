@@ -83,6 +83,7 @@ static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont,
 static const char *termcmd[] = { "kitty", "--single-instance", NULL };
 static const char *roficmd[] = { "rofi", "-show", "drun", NULL };
 static const char *yazicmd[] = { "kitty", "--single-instance", "yazi", NULL };
+static const char *slockcmd[] = { "slock", NULL };
 
 /* Hardware controls (PipeWire volume & brightness for Framework 13) */
 static const char *upvol[]      = { "wpctl", "set-volume", "-l", "1.5", "@DEFAULT_AUDIO_SINK@", "5%+", NULL };
@@ -116,6 +117,11 @@ static const Key keys[] = {
 	{ MODKEY,                       XK_space,  spawn,          {.v = roficmd } },
 	{ MODKEY,                       XK_Return, spawn,          {.v = termcmd } },
 	{ MODKEY,                       XK_e,      spawn,          {.v = yazicmd } },
+
+	/* Screen Lock */
+	{ MODKEY|ShiftMask,             XK_l,      spawn,          {.v = slockcmd } },
+	{ MODKEY|ControlMask,           XK_q,      spawn,          {.v = slockcmd } },
+	{ ControlMask|Mod1Mask,         XK_l,      spawn,          {.v = slockcmd } },
 
 	/* Window & Tag Control */
 	{ MODKEY|ShiftMask,             XK_c,      killclient,     {0} },
